@@ -1,4 +1,5 @@
-import { Table, TableHead, TableRow, TableCell, TableBody, Box, Typography, Tooltip, Button, TextField } from "@material-ui/core";
+import classes from "*.module.css";
+import { Table, TableHead, TableRow, TableCell, TableBody, Box, Typography, Tooltip, Button, TextField, makeStyles } from "@material-ui/core";
 import { Edit } from "@material-ui/icons";
 import { getWeek } from "date-fns";
 import React, { useState } from "react";
@@ -144,8 +145,28 @@ export const QuarterTable: React.FC<TableProps> = ({ data, dateValue, quarterNum
             return false;
           }
       }
+      else
+      {
+        if (year > task.startDate.getFullYear() && year < task.endDate.getFullYear())
+        {
+          return true;
+        }
+        else
+        {
+          return false;
+        }
+      }
+      
     }
+    const useStyles = makeStyles(theme => ({
+      customTooltip: {
+        // I used the rgba color for the standard "secondary" color
+        fontSize: theme.typography.pxToRem(14),
+      }
+    }))
 
+    const classes = useStyles();
+    
     return(
     <Table>
       <TableHead>
@@ -200,7 +221,9 @@ export const QuarterTable: React.FC<TableProps> = ({ data, dateValue, quarterNum
           ><TableCell>
             <Table>
             {weekListHelper(quarterNumber, 1, dateValue.getFullYear()).map((e) => 
-              <Tooltip title={coloring(task, e, dateValue.getFullYear()) === true ? 'Week: ' + e + ' - ' + task.description : 'Week: ' + e}>
+              <Tooltip classes={{
+                tooltip: classes.customTooltip
+              }} title={coloring(task, e, dateValue.getFullYear()) === true ? 'Week: ' + e + ' - Ülesanne: ' + task.description : 'Week: ' + e}>
                <TableCell style={coloring(task, e, dateValue.getFullYear()) === true ? {backgroundColor:'red', color: 'white',} : {}}>
                  
                </TableCell>
@@ -211,7 +234,9 @@ export const QuarterTable: React.FC<TableProps> = ({ data, dateValue, quarterNum
             <TableCell>
               <Table>
               {weekListHelper(quarterNumber, 2, dateValue.getFullYear()).map((e) => 
-              <Tooltip title={coloring(task, e, dateValue.getFullYear()) === true ? 'Week: ' + e + ' - ' + task.description : 'Week: ' + e}>
+              <Tooltip classes={{
+                tooltip: classes.customTooltip
+              }} title={coloring(task, e, dateValue.getFullYear()) === true ? 'Week: ' + e + ' - Ülesanne: ' + task.description : 'Week: ' + e}>
                <TableCell style={coloring(task, e, dateValue.getFullYear()) === true ? {backgroundColor:'red', color: 'white',} : {}}>
                  
                </TableCell>
@@ -222,7 +247,9 @@ export const QuarterTable: React.FC<TableProps> = ({ data, dateValue, quarterNum
             <TableCell>
               <Table>
               {weekListHelper(quarterNumber, 3, dateValue.getFullYear()).map((e) => 
-              <Tooltip title={coloring(task, e, dateValue.getFullYear()) === true ? 'Week: ' + e + ' - ' + task.description : 'Week: ' + e}>
+              <Tooltip classes={{
+                tooltip: classes.customTooltip
+              }} title={coloring(task, e, dateValue.getFullYear()) === true ? 'Week: ' + e + ' - Ülesanne: ' + task.description : 'Week: ' + e}>
                <TableCell style={coloring(task, e, dateValue.getFullYear()) === true ? {backgroundColor:'red', color: 'white',} : {}}>
                  
                </TableCell>
