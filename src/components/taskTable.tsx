@@ -1,5 +1,6 @@
 import { Table, TableHead, TableRow, TableCell, TableBody, Box, Typography, Tooltip, Button, TextField } from "@material-ui/core";
 import { Edit } from "@material-ui/icons";
+import { da } from "date-fns/locale";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { format } from "util";
@@ -13,8 +14,8 @@ type TableProps = {
 
 
 export const TaskTable: React.FC<TableProps> = ({ data, onDataChange }) => {
-    const handleDataChange = (data: Task[]) => {
-      onDataChange(data);
+    const handleDataChange = (data: any) => {
+       onDataChange(data);
     };
     const [taskDescription, setTaskDescription] = useState('');
     const [taskEditDescription, setTaskEditDescription] = useState('');
@@ -42,7 +43,7 @@ export const TaskTable: React.FC<TableProps> = ({ data, onDataChange }) => {
     const changeTaskEndDate = (e: any) => {
         setTaskEndDate(e);
     }
-    const handleAdd = () => {
+    const handleAdd = async () => {
       var newTask : Task = {
         id: data.length + 1,
         description: taskDescription,
