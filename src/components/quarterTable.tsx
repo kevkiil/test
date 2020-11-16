@@ -1,10 +1,13 @@
 import { Table, TableHead, TableRow, TableCell, TableBody, Box, Typography, Tooltip, Button, TextField } from "@material-ui/core";
 import { Edit } from "@material-ui/icons";
+import { getWeek } from "date-fns";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { format } from "util";
 import { Task } from "../types/taskType";
 import DateComponent from "./dateComponent";
+import { getWeekNumberNonISO } from "./getWeek";
+import TaskTable from "./taskTable";
 
 type TableProps = {
     data: Task[]
@@ -13,90 +16,218 @@ type TableProps = {
   };
 
 export const QuarterTable: React.FC<TableProps> = ({ data, dateValue, quarterNumber }) => {
-
+    var dateTest = new Date('2021-01-01')
+    var dateTest1 = new Date('2021-02-01')
+    const quarterList = (quarterNr?: number) =>
+    {
+      switch (quarterNr) {
+        case 1: return ['Jaanuar', 'Veebruar', 'Märts']
+        case 2: return ['Aprill', 'Mai', 'Juuni']
+        case 3: return ['Juuli', 'August', 'September']
+        case 4: return ['Oktoober', 'November', 'Detsember']
+      }
+    }
     
+    const monthFinder = (quarterNumber?: number, monthNumber?: number) =>
+    {
+      switch (quarterNumber) {
+        case 1:
+          {
+            switch (monthNumber) {
+              case 1: return 1;
+              case 2: return 2;
+              case 3: return 3;
+            }
+            break;
+          }
+        case 2:
+          {
+            switch (monthNumber) {
+              case 1: return 4;
+              case 2: return 5;
+              case 3: return 6;
+            }
+            break;
+          }
+        case 3:
+          {
+            switch (monthNumber) {
+              case 1: return 7;
+              case 2: return 8;
+              case 3: return 9;
+            }
+            break;
+          }
+        case 4:
+          {
+            switch (monthNumber) {
+              case 1: return 10;
+              case 2: return 11;
+              case 3: return 12;
+          }
+          break;
+      } 
+    }}
+      
+
+    const weekListHelper = (quarterNumber?: number, monthNumberTemp?: number, yearNumber?: number) =>
+    {
+      let monthNumber = monthFinder(quarterNumber, monthNumberTemp)
+      let monthNumberAdded = monthNumber ? monthNumber + 1 : 0
+      if (monthNumberAdded === 13)
+      {
+        yearNumber = yearNumber ? yearNumber + 1 : 0
+        monthNumberAdded = 1;
+      }
+      
+      var firstday = yearNumber + '-' + monthNumber + '-01'
+      var lastday = yearNumber + '-' + monthNumberAdded + '-01'
+      
+      var weeks = [];
+      var lastDayOfTheMonth = new Date(lastday);
+      var firstDayOfTheMonth = new Date(firstday)
+      var firstWeek = getWeekNumberNonISO(new Date(firstday));
+      
+      lastDayOfTheMonth.setDate(lastDayOfTheMonth.getDate() - 1);
+      
+      var lastWeek = getWeekNumberNonISO(lastDayOfTheMonth);
+      
+      if (getWeekNumberNonISO(firstDayOfTheMonth) > getWeekNumberNonISO(lastDayOfTheMonth))
+      {
+        weeks.push(getWeekNumberNonISO(firstDayOfTheMonth));
+        firstWeek = 1;
+      }
+
+      for (let index = firstWeek; index <= lastWeek; index++) {
+        weeks.push(index)
+      }
+      
+      return weeks;
+    }
+    
+    const coloring = (task: any, weekNr?: any, year?: any ) =>
+    {
+      console.log(weekNr + ' ' + year)
+      if (year === task.startDate.getFullYear())
+      {
+        if (year === task.endDate.getFullYear())
+        {
+          if (weekNr >= getWeekNumberNonISO(task.startDate) && weekNr <= getWeekNumberNonISO(task.endDate))
+          {
+            return true
+          }
+          else
+          {
+            return false;
+          }
+        }
+        else
+        {
+          if (weekNr >= getWeekNumberNonISO(task.startDate))
+          {
+            return true
+          }
+          else
+          {
+            return false;
+          }
+        }
+      }
+      else if (year === task.endDate.getFullYear())
+      {
+        if (weekNr <= getWeekNumberNonISO(task.endDate))
+          {
+            return true
+          }
+          else
+          {
+            return false;
+          }
+      }
+    }
+
     return(
     <Table>
       <TableHead>
         <TableRow >
-          <TableCell >{quarterNumber === 1 ? 'Jaanuar' : quarterNumber === 2 ? 'Aprill' : quarterNumber === 3 ? 'Juuli' : quarterNumber === 4 ? 'Oktoober' : ''}</TableCell>
-          <TableCell >{quarterNumber === 1 ? 'Veebruar' : quarterNumber === 2 ? 'Mai' : quarterNumber === 3 ? 'August' : quarterNumber === 4 ? 'November' : ''}</TableCell>
-          <TableCell>{quarterNumber === 1 ? 'Märts' : quarterNumber === 2 ? 'Juuni' : quarterNumber === 3 ? 'September' : quarterNumber === 4 ? 'Detsember' : ''}</TableCell>
+          {quarterList(quarterNumber)?.map((e) => 
+          <TableCell>{e}</TableCell>
+          )}
+          
         </TableRow>
       </TableHead>
       <TableBody>
         <TableCell>
         <Table>
         <TableBody>
-        {quarterNumber === 1 ? <TableRow>
-          <TableCell>1</TableCell><TableCell>2</TableCell><TableCell>3</TableCell><TableCell>4</TableCell>
-          </TableRow> : quarterNumber === 2 ? <TableRow>
-          <TableCell>13</TableCell><TableCell>14</TableCell><TableCell>15</TableCell><TableCell>16</TableCell>
-          </TableRow> : quarterNumber === 3 ? <TableRow>
-          <TableCell>25</TableCell><TableCell>26</TableCell><TableCell>27</TableCell><TableCell>28</TableCell>
-          </TableRow> : quarterNumber === 4 ? <TableRow>
-          <TableCell>37</TableCell><TableCell>38</TableCell><TableCell>39</TableCell><TableCell>40</TableCell>
-          </TableRow> : ''}
-          </TableBody>
-          </Table>
-          </TableCell>
+        <TableRow>
+          
+          {weekListHelper(quarterNumber, 1, dateValue.getFullYear()).map((e) => 
+          <TableCell>{e}</TableCell>
+          )}
+        </TableRow>
+        </TableBody>
+        </Table>
+        </TableCell>
           <TableCell>
         <Table>
         <TableHead>
-        {quarterNumber === 1 ? <TableRow>
-          <TableCell>5</TableCell><TableCell>6</TableCell><TableCell>7</TableCell><TableCell>8</TableCell>
-          </TableRow> : quarterNumber === 2 ? <TableRow>
-          <TableCell>17</TableCell><TableCell>18</TableCell><TableCell>19</TableCell><TableCell>20</TableCell>
-          </TableRow> : quarterNumber === 3 ? <TableRow>
-          <TableCell>29</TableCell><TableCell>30</TableCell><TableCell>31</TableCell><TableCell>32</TableCell>
-          </TableRow> : quarterNumber === 4 ? <TableRow>
-          <TableCell>41</TableCell><TableCell>42</TableCell><TableCell>43</TableCell><TableCell>44</TableCell>
-          </TableRow> : ''}
-          </TableHead>
-          </Table>
-          </TableCell>
-          <TableCell>
+        <TableRow>
+        {weekListHelper(quarterNumber, 2, dateValue.getFullYear()).map((e) => 
+          <TableCell>{e}</TableCell>
+          )}
+        </TableRow>
+        </TableHead>
+        </Table>
+        </TableCell>
+        <TableCell>
         <Table>
         <TableHead>
-        {quarterNumber === 1 ? <TableRow>
-          <TableCell>9</TableCell><TableCell>10</TableCell><TableCell>11</TableCell><TableCell>12</TableCell>
-          </TableRow> : quarterNumber === 2 ? <TableRow>
-          <TableCell>21</TableCell><TableCell>22</TableCell><TableCell>23</TableCell><TableCell>24</TableCell>
-          </TableRow> : quarterNumber === 3 ? <TableRow>
-          <TableCell>33</TableCell><TableCell>34</TableCell><TableCell>35</TableCell><TableCell>36</TableCell>
-          </TableRow> : quarterNumber === 4 ? <TableRow>
-          <TableCell>45</TableCell><TableCell>46</TableCell><TableCell>47</TableCell><TableCell>48</TableCell>
-          </TableRow> : ''}
+        <TableRow>
+        {weekListHelper(quarterNumber, 3, dateValue.getFullYear()).map((e) => 
+          <TableCell>{e}</TableCell>
+          )}
+          </TableRow>
           </TableHead>
           </Table>
           </TableCell>
         {data
         .map(task => (
+          
           <TableRow
             
             key={task.id}
           ><TableCell>
             <Table>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
+            {weekListHelper(quarterNumber, 1, dateValue.getFullYear()).map((e) => 
+              <Tooltip title={coloring(task, e, dateValue.getFullYear()) === true ? 'Week: ' + e + ' - ' + task.description : 'Week: ' + e}>
+               <TableCell style={coloring(task, e, dateValue.getFullYear()) === true ? {backgroundColor:'red', color: 'white',} : {}}>
+                 
+               </TableCell>
+               </Tooltip>
+                )}
             </Table>
             </TableCell>
             <TableCell>
               <Table>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                {quarterNumber === 4  && dateValue.getFullYear() === 2020 ? <TableCell style={task.id === 1 || task.id === 2 ? {backgroundColor:'red', color: 'white',} : {}}></TableCell> : ''}
-                {quarterNumber === 4 && dateValue.getFullYear() === 2020 ? <TableCell style={task.id === 1 || task.id === 2 ? {backgroundColor:'red', color: 'white',} : {}}></TableCell> : ''}
+              {weekListHelper(quarterNumber, 2, dateValue.getFullYear()).map((e) => 
+              <Tooltip title={coloring(task, e, dateValue.getFullYear()) === true ? 'Week: ' + e + ' - ' + task.description : 'Week: ' + e}>
+               <TableCell style={coloring(task, e, dateValue.getFullYear()) === true ? {backgroundColor:'red', color: 'white',} : {}}>
+                 
+               </TableCell>
+               </Tooltip>
+                )}
               </Table>
             </TableCell>
             <TableCell>
               <Table>
-                {quarterNumber === 4 && dateValue.getFullYear() === 2020 ? <TableCell style={task.id === 1 || task.id === 2 ? {backgroundColor:'red', color: 'white',} : {}}></TableCell> : ''}
-                {quarterNumber === 4 && dateValue.getFullYear() === 2020 ? <TableCell style={task.id === 1 ? {backgroundColor:'red', color: 'white',} : {}}></TableCell> : ''}
-                {quarterNumber === 4 && dateValue.getFullYear() === 2020 ? <TableCell style={task.id === 1 ? {backgroundColor:'red', color: 'white',} : {}}></TableCell> : ''}
-                {quarterNumber === 4 && dateValue.getFullYear() === 2020 ? <TableCell style={task.id === 1 ? {backgroundColor:'red', color: 'white',} : {}}></TableCell> : ''}
+              {weekListHelper(quarterNumber, 3, dateValue.getFullYear()).map((e) => 
+              <Tooltip title={coloring(task, e, dateValue.getFullYear()) === true ? 'Week: ' + e + ' - ' + task.description : 'Week: ' + e}>
+               <TableCell style={coloring(task, e, dateValue.getFullYear()) === true ? {backgroundColor:'red', color: 'white',} : {}}>
+                 
+               </TableCell>
+               </Tooltip>
+                )}
               </Table>
             </TableCell>
           </TableRow>
